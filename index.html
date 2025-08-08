@@ -2,21 +2,28 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>2D Physics Sandbox</title>
+  <title>2d Physics Sandbox By Noah</title>
   <style>
-    body { margin: 0; overflow: hidden; }
+    body { margin: 0; overflow: hidden; font-family: sans-serif; }
     #controls {
       position: absolute; top: 10px; left: 10px; z-index: 10;
-      background: rgba(255,255,255,0.8); padding: 5px;
-      border-radius: 5px;
+      background: rgba(255,255,255,0.85); padding: 10px;
+      border-radius: 5px; font-size: 14px;
     }
-    button { margin: 3px; padding: 5px 10px; }
+    button, input { margin: 3px 0; width: 100%; }
+    label { display: block; margin-top: 5px; }
   </style>
 </head>
 <body>
 <div id="controls">
   <button id="spawnBox">Spawn Box</button>
   <button id="spawnBall">Spawn Ball</button>
+
+  <label for="sizeSlider">Object Size: <span id="sizeValue">60</span> px</label>
+  <input type="range" id="sizeSlider" min="20" max="150" value="60">
+
+  <label for="gravitySlider">Gravity: <span id="gravityValue">1</span></label>
+  <input type="range" id="gravitySlider" min="-1" max="2" step="0.1" value="1">
 </div>
 
 <canvas id="world"></canvas>
@@ -25,7 +32,7 @@
 <script>
 const { Engine, Render, Runner, World, Bodies, Mouse, MouseConstraint } = Matter;
 
-// Engine and world setup
+// Engine setup
 const engine = Engine.create();
 const world = engine.world;
 
@@ -67,14 +74,34 @@ const mouseConstraint = MouseConstraint.create(engine, {
 World.add(world, mouseConstraint);
 render.mouse = mouse;
 
+// Controls
+let objectSize = 60;
+
+// Size slider
+const sizeSlider = document.getElementById('sizeSlider');
+const sizeValue = document.getElementById('sizeValue');
+sizeSlider.addEventListener('input', () => {
+  objectSize = parseInt(sizeSlider.value);
+  sizeValue.textContent = objectSize;
+});
+
+// Gravity slider
+const gravitySlider = document.getElementById('gravitySlider');
+const gravityValue = document.getElementById('gravityValue');
+gravitySlider.addEventListener('input', () => {
+  const g = parseFloat(gravitySlider.value);
+  engine.world.gravity.y = g;
+  gravityValue.textContent = g;
+});
+
 // Spawn objects
 document.getElementById('spawnBox').addEventListener('click', () => {
-  const box = Bodies.rectangle(Math.random()*window.innerWidth, 50, 60, 60);
+  const box = Bodies.rectangle(Math.random()*window.innerWidth, 50, objectSize, objectSize);
   World.add(world, box);
 });
 
 document.getElementById('spawnBall').addEventListener('click', () => {
-  const ball = Bodies.circle(Math.random()*window.innerWidth, 50, 30);
+  const ball = Bodies.circle(Math.random()*window.innerWidth, 50, objectSize/2);
   World.add(world, ball);
 });
 </script>
