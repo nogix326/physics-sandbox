@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>2D Physics Sandbox</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    #controls {
+      position: absolute; top: 10px; left: 10px; z-index: 10;
+      background: rgba(255,255,255,0.8); padding: 5px;
+      border-radius: 5px;
+    }
+    button { margin: 3px; padding: 5px 10px; }
+  </style>
+</head>
+<body>
+<div id="controls">
+  <button id="spawnBox">Spawn Box</button>
+  <button id="spawnBall">Spawn Ball</button>
+</div>
+
+<canvas id="world"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+<script>
+const { Engine, Render, Runner, World, Bodies, Mouse, MouseConstraint } = Matter;
+
+// Engine and world setup
+const engine = Engine.create();
+const world = engine.world;
+
+// Canvas setup
+const canvas = document.getElementById('world');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const render = Render.create({
+  canvas: canvas,
+  engine: engine,
+  options: {
+    width: window.innerWidth,
+    height: window.innerHeight,
+    wireframes: false,
+    background: '#f0f0f0'
+  }
+});
+Render.run(render);
+
+const runner = Runner.create();
+Runner.run(runner, engine);
+
+// Boundaries
+const boundaries = [
+  Bodies.rectangle(window.innerWidth/2, window.innerHeight+25, window.innerWidth, 50, { isStatic: true }),
+  Bodies.rectangle(window.innerWidth/2, -25, window.innerWidth, 50, { isStatic: true }),
+  Bodies.rectangle(-25, window.innerHeight/2, 50, window.innerHeight, { isStatic: true }),
+  Bodies.rectangle(window.innerWidth+25, window.innerHeight/2, 50, window.innerHeight, { isStatic: true })
+];
+World.add(world, boundaries);
+
+// Mouse control
+const mouse = Mouse.create(render.canvas);
+const mouseConstraint = MouseConstraint.create(engine, {
+  mouse: mouse,
+  constraint: { stiffness: 0.2, render: { visible: false } }
+});
+World.add(world, mouseConstraint);
+render.mouse = mouse;
+
+// Spawn objects
+document.getElementById('spawnBox').addEventListener('click', () => {
+  const box = Bodies.rectangle(Math.random()*window.innerWidth, 50, 60, 60);
+  World.add(world, box);
+});
+
+document.getElementById('spawnBall').addEventListener('click', () => {
+  const ball = Bodies.circle(Math.random()*window.innerWidth, 50, 30);
+  World.add(world, ball);
+});
+</script>
+</body>
+</html>
